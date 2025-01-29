@@ -23,8 +23,11 @@ class MainActivity : AppCompatActivity() {
         // Update the uiState
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                catsViewModel.catsStateFlow.onEach { fact ->
-                    fact?.let { view.populate(it) }
+                catsViewModel.catsStateFlow.onEach { result ->
+                    when (result) {
+                        is Result.Error -> view.showError(result.text)
+                        is Result.Success<*> -> (result.data as? Fact)?.let { view.populate(it) }
+                    }
                 }.collect()
             }
         }

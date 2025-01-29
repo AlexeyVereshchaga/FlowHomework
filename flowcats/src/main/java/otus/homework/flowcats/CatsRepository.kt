@@ -8,19 +8,20 @@ import kotlinx.coroutines.flow.flowOn
 
 class CatsRepository(
     private val catsService: CatsService,
-    private val refreshIntervalMs: Long = 2000
+    private val refreshIntervalMs: Long = 5000
 ) {
 
     fun listenForCatFacts() = flow {
         while (true) {
             runCatching { catsService.getCatFact() }
                 .onSuccess {
-                    emit(it)
+                    emit(Result.Success(it))
                     delay(refreshIntervalMs)
                 }
                 .onFailure {
                     println(it.toString())
                     Log.e("CatsTag", "Error", it)
+                    emit(Result.Error(it.message ?: "Error"))
                     delay(refreshIntervalMs)
                 }
         }
